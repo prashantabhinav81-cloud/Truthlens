@@ -1,0 +1,1158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TruthLens — Private Intelligence Tool</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,400&family=JetBrains+Mono:wght@300;400;500;700&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap');
+
+:root {
+  --bg: #080810;
+  --surface: #0e0e1a;
+  --border: #1a1a2e;
+  --border2: #252540;
+  --gold: #c9a84c;
+  --gold2: #e8c97a;
+  --cyan: #4fc3f7;
+  --red: #ef5350;
+  --green: #66bb6a;
+  --orange: #ffa726;
+  --purple: #ab47bc;
+  --text: #dde1f0;
+  --muted: #5a5a7a;
+  --muted2: #8888aa;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Libre Baskerville', serif;
+  min-height: 100vh;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background:
+    radial-gradient(ellipse at 20% 20%, rgba(201,168,76,0.04) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 80%, rgba(79,195,247,0.03) 0%, transparent 50%),
+    linear-gradient(rgba(201,168,76,0.015) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(201,168,76,0.015) 1px, transparent 1px);
+  background-size: 100% 100%, 100% 100%, 50px 50px, 50px 50px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.wrap {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 40px 20px 80px;
+  position: relative;
+  z-index: 1;
+}
+
+/* HEADER */
+header {
+  text-align: center;
+  margin-bottom: 40px;
+  animation: fadeDown 1s ease;
+}
+
+.eyebrow {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.65rem;
+  letter-spacing: 5px;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 16px;
+  opacity: 0.8;
+}
+
+.logo {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(2.5rem, 6vw, 4.5rem);
+  font-weight: 900;
+  color: var(--gold2);
+  line-height: 1;
+  letter-spacing: -2px;
+}
+
+.logo em { font-style: italic; color: var(--cyan); }
+
+.subtitle {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.7rem;
+  color: var(--muted2);
+  letter-spacing: 2px;
+  margin-top: 14px;
+  text-transform: uppercase;
+}
+
+.header-line {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-top: 24px;
+  justify-content: center;
+}
+
+.hl { width: 80px; height: 1px; background: linear-gradient(90deg, transparent, var(--gold)); }
+.hl.r { background: linear-gradient(90deg, var(--gold), transparent); }
+.diamond { width: 8px; height: 8px; background: var(--gold); transform: rotate(45deg); }
+
+/* STATUS BAR */
+.status-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 20px;
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: 2px;
+  margin-bottom: 20px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.65rem;
+  letter-spacing: 1px;
+}
+
+.status-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--red);
+  animation: pulse 2s infinite;
+}
+
+.status-dot.connected { background: var(--green); }
+.status-text { color: var(--muted2); }
+.status-text span { color: var(--text); }
+
+/* SEARCH PANEL */
+.search-panel {
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: 2px;
+  padding: 32px;
+  margin-bottom: 24px;
+  position: relative;
+  overflow: hidden;
+  animation: fadeUp 0.8s ease 0.2s both;
+}
+
+.search-panel::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--gold), var(--cyan), transparent);
+}
+
+.search-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.65rem;
+  color: var(--gold);
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+
+.search-row {
+  display: flex;
+  gap: 12px;
+  align-items: stretch;
+}
+
+.search-input {
+  flex: 1;
+  background: var(--bg);
+  border: 1px solid var(--border2);
+  border-radius: 2px;
+  padding: 14px 18px;
+  color: var(--text);
+  font-family: 'Libre Baskerville', serif;
+  font-size: 1rem;
+  outline: none;
+  transition: border-color 0.3s;
+}
+
+.search-input:focus { border-color: var(--gold); }
+.search-input::placeholder { color: var(--muted); font-style: italic; }
+
+.category-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.cat-btn {
+  background: transparent;
+  border: 1px solid var(--border2);
+  border-radius: 2px;
+  padding: 6px 14px;
+  color: var(--muted2);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.65rem;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.cat-btn:hover, .cat-btn.active {
+  border-color: var(--gold);
+  color: var(--gold);
+  background: rgba(201,168,76,0.06);
+}
+
+.analyse-btn {
+  background: var(--gold);
+  border: none;
+  border-radius: 2px;
+  padding: 14px 28px;
+  color: #080810;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.analyse-btn:hover { background: var(--gold2); transform: translateY(-1px); }
+.analyse-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+/* MEMORY */
+.memory-panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  padding: 20px 24px;
+  margin-bottom: 24px;
+  display: none;
+}
+
+.memory-panel.visible { display: block; }
+
+.memory-title {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.65rem;
+  color: var(--cyan);
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+
+.memory-items { display: flex; flex-wrap: wrap; gap: 8px; }
+
+.memory-item {
+  background: rgba(79,195,247,0.06);
+  border: 1px solid rgba(79,195,247,0.2);
+  border-radius: 2px;
+  padding: 5px 12px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.65rem;
+  color: var(--cyan);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.memory-item:hover { background: rgba(79,195,247,0.12); }
+
+/* LOADING */
+.loading-panel {
+  display: none;
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: 2px;
+  padding: 40px;
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.loading-panel.visible { display: block; }
+
+.loading-spinner {
+  width: 40px; height: 40px;
+  border: 2px solid var(--border2);
+  border-top-color: var(--gold);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 20px;
+}
+
+.loading-text {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.7rem;
+  color: var(--muted2);
+  letter-spacing: 2px;
+}
+
+.loading-steps {
+  margin-top: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  align-items: center;
+}
+
+.loading-step {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.6rem;
+  color: var(--muted);
+  letter-spacing: 1px;
+  opacity: 0;
+  animation: stepReveal 0.5s ease forwards;
+}
+
+/* RESULTS */
+.results-panel { display: none; }
+.results-panel.visible { display: block; }
+
+.result-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.result-topic {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--gold2);
+}
+
+.result-meta {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.6rem;
+  color: var(--muted);
+  letter-spacing: 1px;
+}
+
+/* CONFIDENCE */
+.confidence-bar-wrap {
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: 2px;
+  padding: 24px;
+  margin-bottom: 20px;
+  position: relative;
+  overflow: hidden;
+}
+
+.confidence-bar-wrap::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--red), var(--orange), var(--green));
+}
+
+.conf-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.65rem;
+  color: var(--muted2);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+
+.conf-score-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 12px;
+}
+
+.conf-number {
+  font-family: 'Playfair Display', serif;
+  font-size: 2.5rem;
+  font-weight: 900;
+  color: var(--green);
+}
+
+.conf-bar-bg {
+  flex: 1;
+  height: 8px;
+  background: var(--border2);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.conf-bar-fill {
+  height: 100%;
+  border-radius: 4px;
+  background: linear-gradient(90deg, var(--red), var(--orange), var(--green));
+  transition: width 1.5s ease;
+  width: 0%;
+}
+
+.conf-reason {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.65rem;
+  color: var(--muted2);
+  line-height: 1.6;
+}
+
+/* SECTIONS */
+.section {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  margin-bottom: 16px;
+  overflow: hidden;
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 18px 24px;
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+  user-select: none;
+  transition: background 0.2s;
+}
+
+.section-header:hover { background: rgba(255,255,255,0.02); }
+
+.section-icon {
+  width: 28px; height: 28px;
+  border-radius: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8rem;
+  flex-shrink: 0;
+}
+
+.section-title {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.7rem;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  flex: 1;
+}
+
+.section-toggle {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.6rem;
+  color: var(--muted);
+}
+
+.section-body { padding: 24px; display: none; }
+.section-body.open { display: block; }
+
+/* EVIDENCE */
+.evidence-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+@media (max-width: 600px) { .evidence-grid { grid-template-columns: 1fr; } }
+
+.evidence-block {
+  background: var(--bg);
+  border-radius: 2px;
+  padding: 16px;
+  border-left: 3px solid var(--border2);
+  margin-bottom: 10px;
+}
+
+.evidence-block.for { border-left-color: var(--green); }
+.evidence-block.against { border-left-color: var(--red); }
+.evidence-block.resolving { border-left-color: var(--cyan); }
+
+.evidence-tag {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.55rem;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+
+.evidence-block.for .evidence-tag { color: var(--green); }
+.evidence-block.against .evidence-tag { color: var(--red); }
+.evidence-block.resolving .evidence-tag { color: var(--cyan); }
+
+.evidence-text { font-size: 0.85rem; line-height: 1.7; color: var(--text); }
+.evidence-source { font-family: 'JetBrains Mono', monospace; font-size: 0.55rem; color: var(--muted); margin-top: 8px; }
+
+/* FLAGS */
+.flag-block {
+  background: rgba(239,83,80,0.05);
+  border: 1px solid rgba(239,83,80,0.2);
+  border-radius: 2px;
+  padding: 16px;
+  margin-bottom: 12px;
+}
+
+.flag-header { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+
+.flag-dot {
+  width: 8px; height: 8px;
+  background: var(--red);
+  border-radius: 50%;
+  animation: pulse 2s infinite;
+}
+
+.flag-name { font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; color: var(--red); font-weight: 700; }
+.flag-text { font-size: 0.85rem; line-height: 1.7; color: var(--muted2); }
+
+/* TIMELINE */
+.timeline { position: relative; padding-left: 24px; }
+
+.timeline::before {
+  content: '';
+  position: absolute;
+  left: 6px; top: 0; bottom: 0;
+  width: 1px;
+  background: linear-gradient(180deg, var(--gold), transparent);
+}
+
+.timeline-item { position: relative; margin-bottom: 20px; }
+
+.timeline-item::before {
+  content: '';
+  position: absolute;
+  left: -21px; top: 6px;
+  width: 8px; height: 8px;
+  background: var(--gold);
+  transform: rotate(45deg);
+}
+
+.timeline-date { font-family: 'JetBrains Mono', monospace; font-size: 0.6rem; color: var(--gold); letter-spacing: 1px; margin-bottom: 4px; }
+.timeline-text { font-size: 0.85rem; line-height: 1.7; color: var(--text); }
+
+/* PERSPECTIVE TABS */
+.perspective-tabs {
+  display: flex;
+  gap: 0;
+  margin-bottom: 16px;
+  border-bottom: 1px solid var(--border);
+  flex-wrap: wrap;
+}
+
+.ptab {
+  padding: 10px 18px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.6rem;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--muted);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  transition: all 0.2s;
+}
+
+.ptab.active { color: var(--gold); border-bottom-color: var(--gold); }
+.ptab:hover { color: var(--muted2); }
+
+.perspective-content { display: none; }
+.perspective-content.active { display: block; }
+.perspective-text { font-size: 0.9rem; line-height: 1.8; color: var(--text); }
+
+/* STOCK */
+.stock-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-bottom: 16px; }
+
+.stock-card { background: var(--bg); border: 1px solid var(--border2); border-radius: 2px; padding: 14px; }
+.stock-symbol { font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; font-weight: 700; color: var(--gold); margin-bottom: 4px; }
+
+.stock-action {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.65rem;
+  padding: 3px 8px;
+  border-radius: 2px;
+  display: inline-block;
+  margin-bottom: 8px;
+}
+
+.stock-action.buy { background: rgba(102,187,106,0.15); color: var(--green); }
+.stock-action.sell { background: rgba(239,83,80,0.15); color: var(--red); }
+.stock-action.watch { background: rgba(255,167,38,0.15); color: var(--orange); }
+.stock-reason { font-size: 0.75rem; color: var(--muted2); line-height: 1.5; }
+
+/* SUMMARY */
+.summary-box {
+  background: var(--bg);
+  border-left: 3px solid var(--gold);
+  padding: 20px 24px;
+  margin-bottom: 16px;
+  border-radius: 0 2px 2px 0;
+}
+
+.summary-text { font-size: 0.95rem; line-height: 1.9; color: var(--text); font-style: italic; }
+
+/* OFFLINE NOTICE */
+.offline-notice {
+  background: rgba(255,167,38,0.05);
+  border: 1px solid rgba(255,167,38,0.3);
+  border-radius: 2px;
+  padding: 16px 20px;
+  margin-bottom: 20px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.65rem;
+  color: var(--orange);
+  line-height: 1.7;
+  letter-spacing: 0.5px;
+}
+
+/* DISCLAIMER */
+.disclaimer {
+  background: rgba(171,71,188,0.05);
+  border: 1px solid rgba(171,71,188,0.15);
+  border-radius: 2px;
+  padding: 16px 20px;
+  margin-top: 30px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.6rem;
+  color: var(--muted);
+  line-height: 1.7;
+  letter-spacing: 0.5px;
+}
+
+/* ANIMATIONS */
+@keyframes fadeDown { from { opacity:0; transform:translateY(-20px); } to { opacity:1; transform:none; } }
+@keyframes fadeUp { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:none; } }
+@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:0.3;} }
+@keyframes stepReveal { to { opacity:1; } }
+.fade-in { animation: fadeUp 0.5s ease both; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="eyebrow">100% Private · Zero Tracking · Local AI</div>
+    <div class="logo">Truth<em>Lens</em></div>
+    <div class="subtitle">Zero Trust · All Sources · Raw Evidence · No Blind Faith</div>
+    <div class="header-line">
+      <div class="hl"></div>
+      <div class="diamond"></div>
+      <div class="hl r"></div>
+    </div>
+  </header>
+
+  <!-- OLLAMA STATUS -->
+  <div class="status-bar" id="statusBar">
+    <div class="status-dot" id="statusDot"></div>
+    <div class="status-text" id="statusText">Checking local AI connection...</div>
+  </div>
+
+  <!-- OFFLINE NOTICE -->
+  <div class="offline-notice" id="offlineNotice" style="display:none">
+    ⚠ Ollama is not running. Please open Command Prompt and type: <strong>ollama serve</strong> — then refresh this page. Make sure Llama 3 is downloaded: <strong>ollama pull llama3</strong>
+  </div>
+
+  <!-- MEMORY -->
+  <div class="memory-panel" id="memoryPanel">
+    <div class="memory-title">▸ Previous Investigations — Click to Re-Analyse</div>
+    <div class="memory-items" id="memoryItems"></div>
+  </div>
+
+  <!-- SEARCH -->
+  <div class="search-panel">
+    <div class="search-label">▸ Enter Topic, Event, Person or Claim to Investigate</div>
+    <div class="search-row">
+      <input class="search-input" id="searchInput" type="text"
+        placeholder="e.g. Iran nuclear deal, Ukraine war causes, WHO pandemic, Elon Musk funding...">
+      <button class="analyse-btn" id="analyseBtn" onclick="startAnalysis()">Investigate</button>
+    </div>
+    <div class="category-row">
+      <button class="cat-btn active" onclick="setCategory(this,'all')">All</button>
+      <button class="cat-btn" onclick="setCategory(this,'politics')">Politics</button>
+      <button class="cat-btn" onclick="setCategory(this,'government')">Government</button>
+      <button class="cat-btn" onclick="setCategory(this,'economics')">Economics</button>
+      <button class="cat-btn" onclick="setCategory(this,'science')">Science</button>
+      <button class="cat-btn" onclick="setCategory(this,'health')">Health</button>
+      <button class="cat-btn" onclick="setCategory(this,'conspiracy')">Conspiracy</button>
+      <button class="cat-btn" onclick="setCategory(this,'stocks')">Stock Market</button>
+      <button class="cat-btn" onclick="setCategory(this,'individuals')">Individuals</button>
+    </div>
+  </div>
+
+  <!-- LOADING -->
+  <div class="loading-panel" id="loadingPanel">
+    <div class="loading-spinner"></div>
+    <div class="loading-text" id="loadingText">INITIALISING INVESTIGATION</div>
+    <div class="loading-steps" id="loadingSteps"></div>
+  </div>
+
+  <!-- RESULTS -->
+  <div class="results-panel" id="resultsPanel"></div>
+
+  <div class="disclaimer">
+    ⚠ This tool runs entirely on your local computer using Ollama + Llama 3. Zero data leaves your machine. Zero tracking. All analysis is AI generated and should be treated as a starting point for your own research — not absolute final truth. Stock analysis is NOT financial advice.
+  </div>
+
+</div>
+
+<script>
+const OLLAMA_URL = 'http://localhost:11434/api/generate';
+const MODEL = 'llama3';
+let currentCategory = 'all';
+let searchMemory = JSON.parse(localStorage.getItem('truthlens_memory') || '[]');
+
+// Check Ollama connection on load
+async function checkOllama() {
+  try {
+    const res = await fetch('http://localhost:11434/api/tags', { method: 'GET' });
+    if (res.ok) {
+      document.getElementById('statusDot').classList.add('connected');
+      document.getElementById('statusText').innerHTML = '<span>Local AI Connected</span> · Llama 3 · 100% Private · Zero Tracking';
+      document.getElementById('offlineNotice').style.display = 'none';
+      document.getElementById('analyseBtn').disabled = false;
+    } else {
+      throw new Error('Not connected');
+    }
+  } catch(e) {
+    document.getElementById('statusDot').classList.remove('connected');
+    document.getElementById('statusText').innerHTML = '<span style="color:var(--red)">Local AI Not Running</span> · Start Ollama first';
+    document.getElementById('offlineNotice').style.display = 'block';
+    document.getElementById('analyseBtn').disabled = true;
+  }
+}
+
+function setCategory(btn, cat) {
+  document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  currentCategory = cat;
+}
+
+function saveToMemory(topic) {
+  if (!searchMemory.includes(topic)) {
+    searchMemory.unshift(topic);
+    if (searchMemory.length > 15) searchMemory.pop();
+    localStorage.setItem('truthlens_memory', JSON.stringify(searchMemory));
+  }
+  renderMemory();
+}
+
+function renderMemory() {
+  const panel = document.getElementById('memoryPanel');
+  const items = document.getElementById('memoryItems');
+  if (searchMemory.length === 0) { panel.classList.remove('visible'); return; }
+  panel.classList.add('visible');
+  items.innerHTML = searchMemory.map(t =>
+    `<div class="memory-item" onclick="loadMemory('${t.replace(/'/g,"\\'")}')">◈ ${t}</div>`
+  ).join('');
+}
+
+function loadMemory(topic) {
+  document.getElementById('searchInput').value = topic;
+  startAnalysis();
+}
+
+async function startAnalysis() {
+  const topic = document.getElementById('searchInput').value.trim();
+  if (!topic) return;
+
+  const btn = document.getElementById('analyseBtn');
+  btn.disabled = true;
+
+  document.getElementById('loadingPanel').classList.add('visible');
+  document.getElementById('resultsPanel').classList.remove('visible');
+  document.getElementById('resultsPanel').innerHTML = '';
+
+  const steps = [
+    '◈ Activating local Llama 3 intelligence...',
+    '◈ Zero data leaving your machine...',
+    '◈ Gathering all perspectives on topic...',
+    '◈ Scanning mainstream and conspiracy narratives...',
+    '◈ Searching historical and ancient context...',
+    '◈ Identifying conflicting evidence...',
+    '◈ Flagging who benefits from each narrative...',
+    '◈ Connecting dots across unrelated events...',
+    '◈ Calculating confidence score...',
+    '◈ Compiling independent conclusion...',
+  ];
+
+  const stepsEl = document.getElementById('loadingSteps');
+  const loadingText = document.getElementById('loadingText');
+  stepsEl.innerHTML = '';
+
+  for (let i = 0; i < steps.length; i++) {
+    await new Promise(r => setTimeout(r, 500));
+    const el = document.createElement('div');
+    el.className = 'loading-step';
+    el.style.animationDelay = '0s';
+    el.textContent = steps[i];
+    stepsEl.appendChild(el);
+    loadingText.textContent = `PHASE ${i+1} OF ${steps.length}`;
+  }
+
+  const prompt = `You are TruthLens — an independent zero-trust intelligence analysis system. You trust NO source blindly. You investigate everything from zero. Your mission is justice and truth above all.
+
+TOPIC: "${topic}"
+CATEGORY: ${currentCategory}
+
+Analyse this topic deeply and return ONLY a valid complete JSON object with this exact structure:
+
+{
+  "topic": "cleaned topic name",
+  "summary": "3-4 sentence independent summary cutting through noise",
+  "confidence": {
+    "score": 0-100,
+    "reason": "explain why this score — what evidence exists, what is hidden, what is uncertain"
+  },
+  "evidence": {
+    "supporting": [
+      {"text": "specific evidence point with details", "source": "type of source", "strength": "strong|moderate|weak"},
+      {"text": "second supporting evidence", "source": "type of source", "strength": "strong|moderate|weak"},
+      {"text": "third supporting evidence", "source": "type of source", "strength": "strong|moderate|weak"}
+    ],
+    "contradicting": [
+      {"text": "specific contradicting evidence with details", "source": "type of source", "strength": "strong|moderate|weak"},
+      {"text": "second contradicting evidence", "source": "type of source", "strength": "strong|moderate|weak"},
+      {"text": "third contradicting evidence", "source": "type of source", "strength": "strong|moderate|weak"}
+    ],
+    "resolving": [
+      {"text": "third evidence resolving the conflict between above", "source": "type of source"},
+      {"text": "second resolving evidence", "source": "type of source"}
+    ]
+  },
+  "who_benefits": [
+    {"entity": "Name of person or government or corporation", "benefit": "how they benefit from mainstream narrative", "evidence": "what links them", "flag_level": "high|medium|low"},
+    {"entity": "second entity", "benefit": "their benefit", "evidence": "evidence", "flag_level": "high|medium|low"},
+    {"entity": "third entity", "benefit": "their benefit", "evidence": "evidence", "flag_level": "high|medium|low"}
+  ],
+  "perspectives": {
+    "mainstream": "what mainstream media and governments say",
+    "alternative": "what alternative researchers and independent journalists say",
+    "conspiracy": "what conspiracy theories exist and why people believe them — treated seriously",
+    "historical": "how history and ancient context relates",
+    "geopolitical": "how this affects different countries"
+  },
+  "timeline": [
+    {"date": "year or period", "event": "key event"},
+    {"date": "year or period", "event": "key event"},
+    {"date": "year or period", "event": "key event"},
+    {"date": "year or period", "event": "key event"},
+    {"date": "year or period", "event": "key event"}
+  ],
+  "dot_connections": [
+    {"connection": "how topic connects to seemingly unrelated event", "coincidence_explanation": "why could be coincidence", "intentional_explanation": "why could be intentional"},
+    {"connection": "second connection", "coincidence_explanation": "explanation", "intentional_explanation": "explanation"},
+    {"connection": "third connection", "coincidence_explanation": "explanation", "intentional_explanation": "explanation"}
+  ],
+  "individual_analysis": [
+    {"name": "key person", "role": "their role", "past_statements": "notable statements and contradictions", "who_funds_them": "known funding sources", "who_benefits_from_them": "who benefits from their actions"},
+    {"name": "second person", "role": "their role", "past_statements": "statements", "who_funds_them": "funding", "who_benefits_from_them": "beneficiaries"}
+  ],
+  "stocks": {
+    "relevant": true or false,
+    "analysis": "how this topic affects financial markets",
+    "picks": [
+      {"symbol": "TICKER", "name": "Company", "action": "BUY|SELL|WATCH", "reason": "why"},
+      {"symbol": "TICKER", "name": "Company", "action": "BUY|SELL|WATCH", "reason": "why"}
+    ],
+    "warning": "risk warning"
+  },
+  "conclusion": "Your brutally honest independent conclusion based purely on evidence weight — no bias — speak truth that powerful people do not want revealed"
+}
+
+CRITICAL RULES:
+- Trust NO source
+- Treat conspiracy theories as seriously as mainstream news until evidence disproves them
+- Include uncomfortable truths
+- Go to ancient history if relevant
+- Connect dots between unrelated events
+- If stocks not relevant set relevant to false and picks to empty array
+- You MUST return complete valid JSON only — no text before or after — close every bracket`;
+
+  try {
+    const res = await fetch(OLLAMA_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: MODEL,
+        prompt: prompt,
+        stream: false,
+        options: {
+          num_predict: 8000,
+          temperature: 0.7,
+          top_p: 0.9
+        }
+      })
+    });
+
+    if (!res.ok) throw new Error('Ollama request failed. Make sure Ollama is running.');
+
+    const data = await res.json();
+    let raw = data.response || '';
+
+    // Clean and parse JSON
+    raw = raw.replace(/```json|```/g, '').trim();
+    const jsonStart = raw.indexOf('{');
+    const jsonEnd = raw.lastIndexOf('}');
+    if (jsonStart === -1 || jsonEnd === -1) throw new Error('No valid JSON returned. Try a more specific topic.');
+    raw = raw.substring(jsonStart, jsonEnd + 1);
+
+    let result;
+    try {
+      result = JSON.parse(raw);
+    } catch(e) {
+      // Try to fix truncated JSON
+      let braces = 0, brackets = 0;
+      for (const ch of raw) {
+        if (ch === '{') braces++;
+        else if (ch === '}') braces--;
+        else if (ch === '[') brackets++;
+        else if (ch === ']') brackets--;
+      }
+      let fixed = raw.replace(/,\s*"[^"]*"\s*:\s*[^,}\]]*$/, '');
+      fixed = fixed.replace(/,\s*\{[^}]*$/, '');
+      for (let i = 0; i < brackets; i++) fixed += ']';
+      for (let i = 0; i < braces; i++) fixed += '}';
+      result = JSON.parse(fixed);
+    }
+
+    saveToMemory(topic);
+    renderResults(result);
+
+  } catch(e) {
+    document.getElementById('loadingPanel').classList.remove('visible');
+    document.getElementById('resultsPanel').classList.add('visible');
+    document.getElementById('resultsPanel').innerHTML = `
+      <div class="flag-block">
+        <div class="flag-header"><div class="flag-dot"></div><div class="flag-name">INVESTIGATION ERROR</div></div>
+        <div class="flag-text">Error: ${e.message}<br><br>Make sure Ollama is running. Open Command Prompt and type: <strong style="color:var(--gold)">ollama serve</strong></div>
+      </div>`;
+    btn.disabled = false;
+    return;
+  }
+
+  document.getElementById('loadingPanel').classList.remove('visible');
+  btn.disabled = false;
+}
+
+function renderResults(r) {
+  const panel = document.getElementById('resultsPanel');
+  panel.classList.add('visible');
+
+  const score = r.confidence?.score || 50;
+  const confColor = score >= 70 ? 'var(--green)' : score >= 40 ? 'var(--orange)' : 'var(--red)';
+
+  let html = `
+    <div class="result-header fade-in">
+      <div class="result-topic">${r.topic || 'Investigation'}</div>
+      <div class="result-meta">◈ LOCAL AI · PRIVATE · ${new Date().toLocaleString()}</div>
+    </div>
+
+    <div class="summary-box fade-in">
+      <div class="summary-text">${r.summary || ''}</div>
+    </div>
+
+    <div class="confidence-bar-wrap fade-in">
+      <div class="conf-label">◈ Evidence Confidence Score</div>
+      <div class="conf-score-row">
+        <div class="conf-number" style="color:${confColor}">${score}%</div>
+        <div class="conf-bar-bg"><div class="conf-bar-fill" id="confFill"></div></div>
+      </div>
+      <div class="conf-reason">${r.confidence?.reason || ''}</div>
+    </div>`;
+
+  // WHO BENEFITS
+  if (r.who_benefits?.length) {
+    html += `<div class="section fade-in">
+      <div class="section-header" onclick="toggleSection(this)">
+        <div class="section-icon" style="background:rgba(239,83,80,0.1);color:var(--red)">⚑</div>
+        <div class="section-title" style="color:var(--red)">Manipulation Flags — Who Benefits</div>
+        <div class="section-toggle">▾</div>
+      </div>
+      <div class="section-body open">`;
+    r.who_benefits.forEach(wb => {
+      const c = wb.flag_level === 'high' ? 'var(--red)' : wb.flag_level === 'medium' ? 'var(--orange)' : 'var(--muted2)';
+      html += `<div class="flag-block">
+        <div class="flag-header"><div class="flag-dot" style="background:${c}"></div><div class="flag-name" style="color:${c}">${wb.entity} — ${(wb.flag_level||'').toUpperCase()} FLAG</div></div>
+        <div class="flag-text"><strong style="color:var(--text)">Benefit:</strong> ${wb.benefit}<br><br><strong style="color:var(--text)">Evidence:</strong> ${wb.evidence}</div>
+      </div>`;
+    });
+    html += `</div></div>`;
+  }
+
+  // EVIDENCE
+  html += `<div class="section fade-in">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon" style="background:rgba(201,168,76,0.1);color:var(--gold)">◈</div>
+      <div class="section-title" style="color:var(--gold)">Raw Evidence — Supporting vs Contradicting</div>
+      <div class="section-toggle">▾</div>
+    </div>
+    <div class="section-body open">
+      <div class="evidence-grid"><div>`;
+
+  r.evidence?.supporting?.forEach(e => {
+    html += `<div class="evidence-block for"><div class="evidence-tag">✓ Supporting · ${e.strength}</div><div class="evidence-text">${e.text}</div><div class="evidence-source">${e.source}</div></div>`;
+  });
+
+  html += `</div><div>`;
+  r.evidence?.contradicting?.forEach(e => {
+    html += `<div class="evidence-block against"><div class="evidence-tag">✗ Contradicting · ${e.strength}</div><div class="evidence-text">${e.text}</div><div class="evidence-source">${e.source}</div></div>`;
+  });
+
+  html += `</div></div>`;
+  if (r.evidence?.resolving?.length) {
+    html += `<div style="margin-top:8px"><div style="font-family:'JetBrains Mono',monospace;font-size:0.6rem;color:var(--cyan);letter-spacing:2px;margin-bottom:10px">◈ RESOLVING EVIDENCE</div>`;
+    r.evidence.resolving.forEach(e => {
+      html += `<div class="evidence-block resolving"><div class="evidence-text">${e.text}</div><div class="evidence-source">${e.source}</div></div>`;
+    });
+    html += `</div>`;
+  }
+  html += `</div></div>`;
+
+  // PERSPECTIVES
+  html += `<div class="section fade-in">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon" style="background:rgba(79,195,247,0.1);color:var(--cyan)">◐</div>
+      <div class="section-title" style="color:var(--cyan)">All Perspectives</div>
+      <div class="section-toggle">▾</div>
+    </div>
+    <div class="section-body open">
+      <div class="perspective-tabs">
+        <div class="ptab active" onclick="switchTab(this,'p-main')">Mainstream</div>
+        <div class="ptab" onclick="switchTab(this,'p-alt')">Alternative</div>
+        <div class="ptab" onclick="switchTab(this,'p-con')">Conspiracy</div>
+        <div class="ptab" onclick="switchTab(this,'p-hist')">Historical</div>
+        <div class="ptab" onclick="switchTab(this,'p-geo')">Geopolitical</div>
+      </div>
+      <div id="p-main" class="perspective-content active"><p class="perspective-text">${r.perspectives?.mainstream||''}</p></div>
+      <div id="p-alt" class="perspective-content"><p class="perspective-text">${r.perspectives?.alternative||''}</p></div>
+      <div id="p-con" class="perspective-content"><p class="perspective-text">${r.perspectives?.conspiracy||''}</p></div>
+      <div id="p-hist" class="perspective-content"><p class="perspective-text">${r.perspectives?.historical||''}</p></div>
+      <div id="p-geo" class="perspective-content"><p class="perspective-text">${r.perspectives?.geopolitical||''}</p></div>
+    </div>
+  </div>`;
+
+  // TIMELINE
+  if (r.timeline?.length) {
+    html += `<div class="section fade-in">
+      <div class="section-header" onclick="toggleSection(this)">
+        <div class="section-icon" style="background:rgba(201,168,76,0.1);color:var(--gold)">⏱</div>
+        <div class="section-title">Historical Timeline</div>
+        <div class="section-toggle">▾</div>
+      </div>
+      <div class="section-body open"><div class="timeline">`;
+    r.timeline.forEach(t => {
+      html += `<div class="timeline-item"><div class="timeline-date">${t.date}</div><div class="timeline-text">${t.event}</div></div>`;
+    });
+    html += `</div></div></div>`;
+  }
+
+  // DOT CONNECTIONS
+  if (r.dot_connections?.length) {
+    html += `<div class="section fade-in">
+      <div class="section-header" onclick="toggleSection(this)">
+        <div class="section-icon" style="background:rgba(171,71,188,0.1);color:var(--purple)">⬡</div>
+        <div class="section-title" style="color:var(--purple)">Hidden Connections</div>
+        <div class="section-toggle">▾</div>
+      </div>
+      <div class="section-body open">`;
+    r.dot_connections.forEach(dc => {
+      html += `<div style="background:var(--bg);border:1px solid var(--border2);border-radius:2px;padding:16px;margin-bottom:12px">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:0.65rem;color:var(--purple);margin-bottom:10px">◈ ${dc.connection}</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+          <div><div style="font-size:0.7rem;font-weight:700;color:var(--muted2);margin-bottom:4px">Could Be Coincidence</div><div style="font-size:0.8rem;color:var(--muted2);line-height:1.6">${dc.coincidence_explanation}</div></div>
+          <div><div style="font-size:0.7rem;font-weight:700;color:var(--red);margin-bottom:4px">Could Be Intentional</div><div style="font-size:0.8rem;color:var(--muted2);line-height:1.6">${dc.intentional_explanation}</div></div>
+        </div>
+      </div>`;
+    });
+    html += `</div></div>`;
+  }
+
+  // INDIVIDUALS
+  if (r.individual_analysis?.length) {
+    html += `<div class="section fade-in">
+      <div class="section-header" onclick="toggleSection(this)">
+        <div class="section-icon" style="background:rgba(255,167,38,0.1);color:var(--orange)">👤</div>
+        <div class="section-title" style="color:var(--orange)">Individual Analysis</div>
+        <div class="section-toggle">▾</div>
+      </div>
+      <div class="section-body open">`;
+    r.individual_analysis.forEach(ind => {
+      html += `<div style="background:var(--bg);border:1px solid var(--border2);border-radius:2px;padding:18px;margin-bottom:12px">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:0.8rem;font-weight:700;color:var(--orange);margin-bottom:4px">${ind.name}</div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:0.6rem;color:var(--muted);margin-bottom:12px">${ind.role}</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+          <div><div style="font-size:0.7rem;font-weight:700;color:var(--text);margin-bottom:4px">Statements & Contradictions</div><div style="font-size:0.8rem;color:var(--muted2);line-height:1.6">${ind.past_statements}</div></div>
+          <div>
+            <div style="font-size:0.7rem;font-weight:700;color:var(--text);margin-bottom:4px">Who Funds Them</div>
+            <div style="font-size:0.8rem;color:var(--muted2);line-height:1.6;margin-bottom:10px">${ind.who_funds_them}</div>
+            <div style="font-size:0.7rem;font-weight:700;color:var(--text);margin-bottom:4px">Who Benefits From Them</div>
+            <div style="font-size:0.8rem;color:var(--muted2);line-height:1.6">${ind.who_benefits_from_them}</div>
+          </div>
+        </div>
+      </div>`;
+    });
+    html += `</div></div>`;
+  }
+
+  // STOCKS
+  if (r.stocks?.relevant && r.stocks?.picks?.length) {
+    html += `<div class="section fade-in">
+      <div class="section-header" onclick="toggleSection(this)">
+        <div class="section-icon" style="background:rgba(102,187,106,0.1);color:var(--green)">$</div>
+        <div class="section-title" style="color:var(--green)">Stock Market Impact</div>
+        <div class="section-toggle">▾</div>
+      </div>
+      <div class="section-body open">
+        <div style="font-size:0.85rem;color:var(--muted2);line-height:1.7;margin-bottom:16px">${r.stocks.analysis}</div>
+        <div class="stock-grid">`;
+    r.stocks.picks.forEach(s => {
+      const ac = s.action === 'BUY' ? 'buy' : s.action === 'SELL' ? 'sell' : 'watch';
+      html += `<div class="stock-card"><div class="stock-symbol">${s.symbol}</div><div style="font-size:0.7rem;color:var(--muted);margin-bottom:6px">${s.name}</div><div class="stock-action ${ac}">${s.action}</div><div class="stock-reason">${s.reason}</div></div>`;
+    });
+    html += `</div><div style="background:rgba(239,83,80,0.05);border:1px solid rgba(239,83,80,0.15);border-radius:2px;padding:12px 16px;font-family:'JetBrains Mono',monospace;font-size:0.6rem;color:var(--red);line-height:1.6">⚠ ${r.stocks.warning}</div></div></div>`;
+  }
+
+  // CONCLUSION
+  html += `<div style="background:var(--surface);border:1px solid var(--border2);border-radius:2px;padding:28px;margin-top:8px;position:relative;overflow:hidden" class="fade-in">
+    <div style="position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--gold),var(--cyan))"></div>
+    <div style="font-family:'JetBrains Mono',monospace;font-size:0.65rem;color:var(--gold);letter-spacing:3px;text-transform:uppercase;margin-bottom:16px">◈ Independent Conclusion</div>
+    <div style="font-size:1rem;line-height:1.9;color:var(--text)">${r.conclusion||''}</div>
+  </div>`;
+
+  panel.innerHTML = html;
+
+  setTimeout(() => {
+    const fill = document.getElementById('confFill');
+    if (fill) fill.style.width = score + '%';
+  }, 300);
+}
+
+function toggleSection(header) {
+  const body = header.nextElementSibling;
+  const toggle = header.querySelector('.section-toggle');
+  body.classList.toggle('open');
+  toggle.textContent = body.classList.contains('open') ? '▾' : '▸';
+}
+
+function switchTab(tab, contentId) {
+  const container = tab.closest('.section-body');
+  container.querySelectorAll('.ptab').forEach(t => t.classList.remove('active'));
+  container.querySelectorAll('.perspective-content').forEach(c => c.classList.remove('active'));
+  tab.classList.add('active');
+  document.getElementById(contentId).classList.add('active');
+}
+
+document.getElementById('searchInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter') startAnalysis();
+});
+
+renderMemory();
+checkOllama();
+setInterval(checkOllama, 10000);
+</script>
+</body>
+</html>
